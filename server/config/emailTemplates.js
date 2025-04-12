@@ -1,201 +1,151 @@
 export const EMAIL_VERIFY_TEMPLATE = `
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
   <title>Email Verify</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" type="text/css">
-  <style type="text/css">
+  <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Open Sans', sans-serif;
-      background: #E5E5E5;
-    }
-    table, td {
-      border-collapse: collapse;
+      font-family: 'Segoe UI', Roboto, monospace, sans-serif;
+      background-color: #0F1117;
+      color: #E5E7EB;
     }
     .container {
       width: 100%;
       max-width: 500px;
-      margin: 70px 0px;
-      background-color: #ffffff;
+      margin: 60px auto;
+      background-color: #1A1D24;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 128, 0.2);
+      overflow: hidden;
     }
-    .main-content {
-      padding: 48px 30px 40px;
-      color: #000000;
+    .content {
+      padding: 40px 30px;
     }
-    .button {
-      width: 100%;
-      background: #22D172;
-      text-decoration: none;
-      display: inline-block;
-      padding: 10px 0;
-      color: #fff;
+    h1 {
+      color: #00FF99;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    p {
       font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .otp-box {
+      background-color: #00FF99;
+      color: #0F1117;
+      padding: 12px 0;
       text-align: center;
       font-weight: bold;
-      border-radius: 7px;
+      font-size: 18px;
+      letter-spacing: 2px;
+      border-radius: 6px;
+      font-family: 'Courier New', Courier, monospace;
+      margin-bottom: 16px;
+    }
+    .footer {
+      font-size: 12px;
+      color: #9CA3AF;
+      margin-top: 20px;
     }
     @media only screen and (max-width: 480px) {
       .container {
-        width: 80% !important;
-      }
-      .button {
-        width: 50% !important;
+        width: 90%;
       }
     }
   </style>
 </head>
 <body>
-  <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#F6FAFB">
-    <tbody>
-      <tr>
-        <td valign="top" align="center">
-          <table class="container" width="600" cellspacing="0" cellpadding="0" border="0">
-            <tbody>
-              <tr>
-                <td class="main-content">
-                  <table width="100%" cellspacing="0" cellpadding="0" border="0">
-                    <tbody>
-                      <tr>
-                        <td style="padding: 0 0 24px; font-size: 18px; line-height: 150%; font-weight: bold;">
-                          Verify your email
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 10px; font-size: 14px; line-height: 150%;">
-                          You are just one step away to verify your account for this email: <span style="color: #4C83EE;">{{email}}</span>.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 16px; font-size: 14px; line-height: 150%; font-weight: 700;">
-                          Use below OTP to verify your account.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 24px;">
-                          <p class="button">{{otp}}</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 10px; font-size: 14px; line-height: 150%;">
-                          This OTP is valid for 24 hours.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="container">
+    <div class="content">
+      <h1>Verify your email</h1>
+      <p>You are one step away from securing your account: <span style="color: #60A5FA;">{{email}}</span></p>
+      <p>Use the OTP below to verify your account:</p>
+      <div class="otp-box">{{otp}}</div>
+      <p>This OTP is valid for 24 hours. Do not share this code with anyone.</p>
+      <div class="footer">SecureMail System © 2025</div>
+    </div>
+  </div>
 </body>
 </html>
 `;
 
 export const PASSWORD_RESET_TEMPLATE = `
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
   <title>Password Reset</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" type="text/css">
-  <style type="text/css">
+  <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Open Sans', sans-serif;
-      background: #E5E5E5;
-    }
-    table, td {
-      border-collapse: collapse;
+      font-family: 'Segoe UI', Roboto, monospace, sans-serif;
+      background-color: #0F1117;
+      color: #E5E7EB;
     }
     .container {
       width: 100%;
       max-width: 500px;
-      margin: 70px 0px;
-      background-color: #ffffff;
+      margin: 60px auto;
+      background-color: #1A1D24;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 128, 0.2);
+      overflow: hidden;
     }
-    .main-content {
-      padding: 48px 30px 40px;
-      color: #000000;
+    .content {
+      padding: 40px 30px;
     }
-    .button {
-      width: 100%;
-      background: #22D172;
-      text-decoration: none;
-      display: inline-block;
-      padding: 10px 0;
-      color: #fff;
+    h1 {
+      color: #00FF99;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    p {
       font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .otp-box {
+      background-color: #00FF99;
+      color: #0F1117;
+      padding: 12px 0;
       text-align: center;
       font-weight: bold;
-      border-radius: 7px;
+      font-size: 18px;
+      letter-spacing: 2px;
+      border-radius: 6px;
+      font-family: 'Courier New', Courier, monospace;
+      margin-bottom: 16px;
+    }
+    .footer {
+      font-size: 12px;
+      color: #9CA3AF;
+      margin-top: 20px;
     }
     @media only screen and (max-width: 480px) {
       .container {
-        width: 80% !important;
-      }
-      .button {
-        width: 50% !important;
+        width: 90%;
       }
     }
   </style>
 </head>
 <body>
-  <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#F6FAFB">
-    <tbody>
-      <tr>
-        <td valign="top" align="center">
-          <table class="container" width="600" cellspacing="0" cellpadding="0" border="0">
-            <tbody>
-              <tr>
-                <td class="main-content">
-                  <table width="100%" cellspacing="0" cellpadding="0" border="0">
-                    <tbody>
-                      <tr>
-                        <td style="padding: 0 0 24px; font-size: 18px; line-height: 150%; font-weight: bold;">
-                          Forgot your password?
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 10px; font-size: 14px; line-height: 150%;">
-                          We received a password reset request for your account: <span style="color: #4C83EE;">{{email}}</span>.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 16px; font-size: 14px; line-height: 150%; font-weight: 700;">
-                          Use the OTP below to reset the password.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 24px;">
-                          <p class="button">{{otp}}</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 10px; font-size: 14px; line-height: 150%;">
-                          The password reset OTP is only valid for the next 15 minutes.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="container">
+    <div class="content">
+      <h1>Password Reset Request</h1>
+      <p>We received a password reset request for your account: <span style="color: #60A5FA;">{{email}}</span></p>
+      <p>Use the OTP below to reset your password:</p>
+      <div class="otp-box">{{otp}}</div>
+      <p>This OTP is valid for 15 minutes. If you didn’t request this, ignore this email.</p>
+      <div class="footer">SecureMail System © 2025</div>
+    </div>
+  </div>
 </body>
 </html>
 `;
