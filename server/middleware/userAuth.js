@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import userModel from "../models/userModel.js";
 
 const userAuth = async (req, res, next) => {
   const { token } = req.cookies;
@@ -18,7 +19,18 @@ const userAuth = async (req, res, next) => {
         message: "Unauthorized: Invalid token",
       });
     }
+
+    // Get user role from database
+    const user = await userModel.findById(tokenDecode.id);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     req.userId = tokenDecode.id;
+    req.userRole = user.role; // Add role to request
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {

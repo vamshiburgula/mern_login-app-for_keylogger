@@ -18,20 +18,13 @@ export const AppContextProvider = ({ children }) => {
         withCredentials: true,
       });
 
-      if (data.success) {
+      if (data.success && data.user) {
         setIsLoggedin(true);
-        console.log(
-          "%c[✓] Authenticated | Fetching user data...",
-          "color: cyan; font-weight: bold;"
-        );
-        await getUserData();
+        setUserData(data.user);
+        console.log("User data loaded:", data.user);
       }
     } catch (error) {
-      console.error(
-        "%c[✗] Auth Check Failed:",
-        "color: red; font-weight: bold;",
-        error.response?.data?.message || error.message
-      );
+      console.error("Auth check failed:", error);
     }
   };
 

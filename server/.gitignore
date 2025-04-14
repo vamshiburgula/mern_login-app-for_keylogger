@@ -1,2 +1,28 @@
+# Node.js
 node_modules/
+npm-debug.log*
+
+# Environment variables
 .env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Python
+venv/
+*.pyc
+__pycache__/
+
+# IDE specific files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Log files 
+*.log
+log.txt

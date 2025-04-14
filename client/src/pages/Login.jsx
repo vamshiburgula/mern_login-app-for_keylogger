@@ -28,8 +28,15 @@ const Login = () => {
 
       if (data.success) {
         setIsLoggedin(true);
+        const user = data.user; // Assuming backend sends role inside `user`
+
         await getUserData();
-        navigate("/");
+
+        if (user?.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/user-dashboard");
+        }
       } else {
         toast.error(data.message);
       }

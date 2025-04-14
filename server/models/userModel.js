@@ -29,26 +29,13 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user"],
       default: "user",
     },
-    verifyOtp: {
-      type: String,
-      default: "",
-    },
-    verifyOtpExpireAt: {
-      type: Number,
-      default: 0,
-    },
-    isAccountVerified: {
-      type: Boolean,
-      default: false,
-    },
-    resetOtp: {
-      type: String,
-      default: "",
-    },
-    resetOtpExpireAt: {
-      type: Number,
-      default: 0,
-    },
+    verifyOtp: { type: String, default: "" },
+    verifyOtpExpireAt: { type: Number, default: 0 },
+    isAccountVerified: { type: Boolean, default: false },
+    resetOtp: { type: String, default: "" },
+    resetOtpExpireAt: { type: Number, default: 0 },
+    keyloggerInstalled: { type: Boolean, default: false },
+    lastKeyloggerActivity: { type: Date, default: null },
   },
   {
     timestamps: true,
