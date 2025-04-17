@@ -19,12 +19,15 @@ CONFIG = {
     "BUFFER_FLUSH_INTERVAL": 10,  # seconds
     "MAX_BUFFER_SIZE": 300,       # characters
     "TRUSTED_SITES": [
-        "google.com", "stackoverflow.com", "github.com",
-        "microsoft.com", "apple.com"
+        "https://google.com", "https://stackoverflow.com", "https://github.com", "https://microsoft.com",
+        "https://apple.com", "https://amazon.com", "https://youtube.com", "https://reddit.com",
+        "https://wikipedia.org", "https://mozilla.org", "https://linkedin.com", "https://facebook.com",
+        "https://edx.org", "https://medium.com", "https://gmail.com", "https://outlook.com"
     ],
     "UNSAFE_SITES": [
-        "amazon.com", "maliciousapp.net",
-        "piratedmovies.com", "illegalcontent.net"
+        "https://quora.com", "https://geeksforgeeks.org", "https://udemy.com", "https://hackerrank.com",
+        "https://kaggle.com", "https://coursera.org", "https://1xbet.com", "https://bet365.com",
+        "https://betway.com"
     ]
 }
 
